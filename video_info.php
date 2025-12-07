@@ -1,20 +1,11 @@
 <?php
+// FIX 1: CORS Header - Allows the frontend (GitHub Pages) to communicate with the local backend (localhost:5000)
+header("Access-Control-Allow-Origin: *"); 
 
 // Always return JSON
 function send_json($data) {
     header("Content-Type: application/json; charset=utf-8");
     echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    exit;
-}
-
-// Detect if PHP is not being executed (e.g., GitHub Pages)
-if (!function_exists('json_encode')) {
-    // This means PHP isn't running!
-    header("Content-Type: application/json");
-    echo json_encode([
-        "error" => "Server is not running PHP. This file cannot execute on GitHub Pages.",
-        "fix"   => "Deploy backend to a real PHP server, not GitHub Pages."
-    ]);
     exit;
 }
 
