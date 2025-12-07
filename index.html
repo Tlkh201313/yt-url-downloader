@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web-based YouTube Downloader websites</title>
+    <title>Web-based YouTube Downloader</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    
     <style>
         .container {
             width: auto;
@@ -33,43 +34,57 @@
             }
         }
     </style>
+    
     <script>
         $(function () {
             $("#btn_fetch").click(function (e) {
-                e.preventDefault = false;
+                e.preventDefault(); 
                 let url = $("#txt_url").val();
                 let oThis = $(this);
                 oThis.attr('disabled', true);
 
-                $.get('https://yt-dlp-api.peterli.website/video/?video_url=' + url, function (data) {
+                // FIX: Using relative path for local Docker service instead of external API
+                $.get('./video_info.php?video_url=' + url, function (data) {
                     console.log(data);
 
                     oThis.attr('disabled', false);
+
+                    // Ensure data is parsed as JSON if it came as a string
+                    if (typeof data === 'string') {
+                        try {
+                            data = JSON.parse(data);
+                        } catch (err) {
+                            alert('Error: Failed to parse server response.');
+                            return false;
+                        }
+                    }
 
                     let links = data['links'];
                     let error = data['error'];
 
                     if (error) {
-                        alert('錯誤訊息: ' + error);
+                        alert('Error Message: ' + error);
                         return false;
                     }
 
-                    if (links.length === 0) {
-                        alert('沒有找到任何的影片連結!');
+                    if (!links || links.length === 0) {
+                        alert('No video links were found!');
                         return false;
                     }
 
                     let tbodyVideoLists = '';
                     let dataIndex = 1;
                     let downloadLink = '';
+                    
                     for (index in links) {
-                        downloadLink = './download.php?video_url=' + links[index]['url'];
+                        downloadLink = './download.php?video_url=' + encodeURIComponent(links[index]['url']);
 
                         tbodyVideoLists += '<tr>';
                         tbodyVideoLists += '<th scope="row">' + dataIndex + '</th>';
                         tbodyVideoLists += '<td>' + links[index]['format'] + '</td>';
                         tbodyVideoLists += '<td>' + links[index]['itag'] + '</td>';
-                        tbodyVideoLists += '<td><a href="' + downloadLink  + '">下載</a></td>';
+                        // Translated: '下載' to 'Download'
+                        tbodyVideoLists += '<td><a href="' + downloadLink + '">Download</a></td>';
                         tbodyVideoLists += '</tr>';
                         dataIndex += 1;
                     }
@@ -77,7 +92,6 @@
                     $('#video-lists').html(tbodyVideoLists);
                 });
             });
-
         });
     </script>
 </head>
@@ -92,28 +106,24 @@
                         <div class="col-auto">
                             <i class="fas fa-search h4 text-body"></i>
                         </div>
-                        <!--end of col-->
                         <div class="col">
-                            <input id="txt_url" class="form-control form-control-lg" type="text" placeholder="請貼上YouTube影片網址">
+                            <input id="txt_url" class="form-control form-control-lg" type="text" placeholder="Paste YouTube Video URL here">
                         </div>
-                        <!--end of col-->
                         <div class="col-auto">
-                            <button id="btn_fetch" class="btn btn-lg btn-success" type="button">查詢</button>
+                            <button id="btn_fetch" class="btn btn-lg btn-success" type="button">Fetch</button>
                         </div>
-                        <!--end of col-->
-                    </div>
+                        </div>
                 </form>
             </div>
-            <!--end of col-->
             </div>
-           <div class="row justify-content-left">
+            <div class="row justify-content-left">
           <table class="table">
             <thead class="thead-dark">
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">影片格式</th>
+                <th scope="col">Video Format</th> 
                 <th scope="col">itag</th>
-                <th scope="col">影片網址</th>
+                <th scope="col">Download Link</th>
               </tr>
             </thead>
             <tbody id="video-lists"></tbody>
