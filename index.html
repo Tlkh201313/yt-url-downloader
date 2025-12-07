@@ -77,7 +77,6 @@
                     let downloadLink = '';
                     
                     for (index in links) {
-                        // Ensure video URL is encoded for the PHP script
                         downloadLink = './download.php?video_url=' + encodeURIComponent(links[index]['url']);
 
                         tbodyVideoLists += '<tr>';
