@@ -14,20 +14,20 @@
             theme: {
                 extend: {
                     colors: {
-                        'background': '#1f202b',
+                        'background': '#0a0e27',
                         'foreground': '#e6f0ff',
-                        'card': '#242633',
-                        'primary': '#00ffff', // Bright Cyan
-                        'primary-foreground': '#1f202b',
-                        'secondary': '#a020f0', // Purple Neon
-                        'secondary-foreground': '#1f202b',
-                        'muted': '#33354a',
+                        'card': '#1a1f3a',
+                        'primary': '#00ffff',
+                        'primary-foreground': '#0a0e27',
+                        'secondary': '#a020f0',
+                        'secondary-foreground': '#0a0e27',
+                        'muted': '#2a2f4a',
                         'muted-foreground': '#94b3c4',
-                        'accent': '#ff33d1', // Pink Neon
-                        'accent-foreground': '#1f202b',
+                        'accent': '#ff33d1',
+                        'accent-foreground': '#0a0e27',
                         'destructive': '#cd3a2f',
-                        'border': '#33354a',
-                        'input': '#33354a',
+                        'border': '#2a2f4a',
+                        'input': '#1a1f3a',
                         'ring': '#00ffff',
                     },
                 }
@@ -36,38 +36,341 @@
     </script>
     
     <style>
-        /* Custom styling for the select box */
+        /* Root variables for easier color management */
+        :root {
+            --color-primary: #00ffff;
+            --color-secondary: #a020f0;
+            --color-accent: #ff33d1;
+            --color-background: #0a0e27;
+            --color-foreground: #e6f0ff;
+            --color-input: #1a1f3a;
+            --color-border: #2a2f4a;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced body styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        /* Animated gradient background with multiple layers */
+        @keyframes gradient-shift {
+            0%, 100% { 
+                background-position: 0% 50%;
+            }
+            50% { 
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes scanline-animation {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                opacity: 1;
+                filter: brightness(1);
+            }
+            50% {
+                opacity: 0.85;
+                filter: brightness(1.15);
+            }
+        }
+
+        @keyframes float-animation {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .cyber-gradient {
+            background: linear-gradient(
+                -45deg,
+                #0a0e27,
+                #1a1f3a,
+                #2a2f4a,
+                #1a1f3a,
+                #0a0e27
+            );
+            background-size: 400% 400%;
+            animation: gradient-shift 20s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Scanline overlay effect */
+        .cyber-gradient::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(
+                to bottom,
+                transparent,
+                rgba(0, 255, 255, 0.3),
+                transparent
+            );
+            animation: scanline-animation 8s linear infinite;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Grid pattern overlay */
+        .cyber-gradient::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Enhanced cyber glow effect */
+        .cyber-glow {
+            box-shadow: 
+                0 0 5px rgba(0, 255, 255, 0.3),
+                0 0 10px rgba(0, 255, 255, 0.5),
+                0 0 20px rgba(0, 255, 255, 0.3),
+                0 0 40px rgba(0, 255, 255, 0.1),
+                inset 0 0 10px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-glow:hover {
+            box-shadow: 
+                0 0 8px rgba(0, 255, 255, 0.5),
+                0 0 15px rgba(0, 255, 255, 0.7),
+                0 0 30px rgba(0, 255, 255, 0.4),
+                0 0 50px rgba(0, 255, 255, 0.2),
+                inset 0 0 15px rgba(0, 255, 255, 0.15);
+        }
+
+        /* Secondary glow for purple accent */
+        .cyber-glow-secondary {
+            box-shadow: 
+                0 0 5px rgba(160, 32, 240, 0.3),
+                0 0 10px rgba(160, 32, 240, 0.5),
+                0 0 20px rgba(160, 32, 240, 0.3),
+                0 0 40px rgba(160, 32, 240, 0.1);
+        }
+
+        /* Accent glow for pink */
+        .cyber-glow-accent {
+            box-shadow: 
+                0 0 5px rgba(255, 51, 209, 0.3),
+                0 0 10px rgba(255, 51, 209, 0.5),
+                0 0 20px rgba(255, 51, 209, 0.3);
+        }
+
+        /* Pulse animation class */
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Float animation for cards */
+        .float-animation {
+            animation: float-animation 3s ease-in-out infinite;
+        }
+
+        /* Enhanced select box styling */
         .cyber-select {
-            background-color: var(--color-input); 
+            background-color: var(--color-input);
             color: var(--color-foreground);
-            border: 1px solid var(--color-primary); 
-            padding: 0.5rem;
-            border-radius: 0.125rem;
-            box-shadow: inset 0 0 5px var(--color-primary)33;
+            border: 2px solid var(--color-primary);
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            border-radius: 0.25rem;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 255, 0.1),
+                0 0 10px rgba(0, 255, 255, 0.2);
             height: 3rem;
-            appearance: none; 
+            appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='oklch(0.7 0.2 200)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 0.7em top 50%;
-            background-size: 0.65em auto;
+            background-position: right 0.75rem top 50%;
+            background-size: 1.2em auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
-        /* Animated gradient background */
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        .cyber-gradient {
-            background: linear-gradient(-45deg, #1f202b, #242633, #2b2e3e, #1f202b);
-            background-size: 400% 400%;
-            animation: gradient-shift 15s ease infinite;
+        .cyber-select:hover {
+            border-color: #00ffff;
+            box-shadow: 
+                inset 0 0 15px rgba(0, 255, 255, 0.15),
+                0 0 15px rgba(0, 255, 255, 0.3);
         }
 
-        /* Cyber glow effect */
-        .cyber-glow {
-            box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff80;
+        .cyber-select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 
+                inset 0 0 20px rgba(0, 255, 255, 0.2),
+                0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .cyber-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Enhanced input styling */
+        input[type="text"] {
+            transition: all 0.3s ease;
+            border-radius: 0.25rem;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 255, 0.1),
+                0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Enhanced button styling */
+        button {
+            transition: all 0.3s ease;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            letter-spacing: 0.75px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Fetch button styling */
+        #btn_fetch {
+            background: linear-gradient(135deg, #00ffff, #00cccc);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        #btn_fetch:hover:not(:disabled) {
+            background: linear-gradient(135deg, #00ffff, #00ffff);
+            box-shadow: 
+                0 0 15px rgba(0, 255, 255, 0.5),
+                0 0 30px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #btn_fetch:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        /* Download button styling */
+        #btn_download {
+            background: linear-gradient(135deg, #a020f0, #8010d0);
+            border: 2px solid #a020f0;
+            box-shadow: 0 0 10px rgba(160, 32, 240, 0.3);
+        }
+
+        #btn_download:hover:not(:disabled) {
+            background: linear-gradient(135deg, #a020f0, #a020f0);
+            box-shadow: 
+                0 0 15px rgba(160, 32, 240, 0.5),
+                0 0 30px rgba(160, 32, 240, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #btn_download:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        #btn_download:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Card styling with enhanced effects */
+        .card-enhanced {
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card-enhanced:hover {
+            border-color: rgba(0, 255, 255, 0.4);
+            box-shadow: 
+                0 12px 48px rgba(0, 255, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Title styling */
+        h1 {
+            text-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.5),
+                0 0 20px rgba(0, 255, 255, 0.3);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        /* Label styling */
+        label {
+            text-shadow: 0 0 5px rgba(160, 32, 240, 0.3);
+        }
+
+        /* Smooth transitions for all interactive elements */
+        * {
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Remove default outline and use custom focus styles */
+        *:focus {
+            outline: none;
+        }
+
+        /* Placeholder styling */
+        ::placeholder {
+            color: rgba(148, 179, 196, 0.6);
+        }
+
+        /* Selection styling */
+        ::selection {
+            background: rgba(0, 255, 255, 0.3);
+            color: var(--color-foreground);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 255, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 255, 0.7);
         }
     </style>
 
@@ -189,27 +492,27 @@
     </script>
 </head>
 <body class="cyber-gradient min-h-screen p-4 flex items-start justify-center">
-    <main class="w-full max-w-xl mx-auto mt-20">
-        <div class="bg-card text-foreground p-8 rounded-lg shadow-xl border border-primary/50 cyber-glow">
-            <h1 class="text-3xl font-bold mb-6 text-primary tracking-wider border-b border-secondary/50 pb-2">
+    <main class="w-full max-w-xl mx-auto mt-20 relative z-10">
+        <div class="bg-card text-foreground p-8 rounded-lg shadow-xl border border-primary/50 cyber-glow card-enhanced">
+            <h1 class="text-4xl font-bold mb-6 text-primary tracking-widest border-b-2 border-secondary/50 pb-4">
                 CYBER DRAIN
             </h1>
-            <p class="text-sm text-muted-foreground mb-6">
+            <p class="text-sm text-muted-foreground mb-6 leading-relaxed">
                 Enter a YouTube URL to retrieve available download streams.
             </p>
 
             <div class="flex space-x-2 mb-6">
                 <input id="txt_url" type="text" placeholder="Paste YouTube Video URL here" 
-                       class="flex-grow p-3 bg-input border border-border focus:border-primary/80 focus:ring-1 focus:ring-primary/50 rounded-sm text-foreground placeholder-muted-foreground transition duration-300">
+                       class="flex-grow p-3 bg-input border-2 border-border focus:border-primary/80 focus:ring-1 focus:ring-primary/50 rounded-sm text-foreground placeholder-muted-foreground transition duration-300">
                 
                 <button id="btn_fetch" 
-                        class="bg-primary text-primary-foreground hover:bg-primary/80 transition duration-300 px-6 py-3 rounded-sm font-semibold">
+                        class="text-primary-foreground hover:bg-primary/80 transition duration-300 px-6 py-3 rounded-sm font-semibold">
                     Fetch
                 </button>
             </div>
 
             <div class="space-y-4">
-                <label for="select_format" class="text-sm font-medium text-secondary">
+                <label for="select_format" class="text-sm font-medium text-secondary block">
                     Select Format Stream:
                 </label>
                 <div class="relative">
@@ -219,7 +522,7 @@
                 </div>
 
                 <button id="btn_download" disabled
-                        class="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition duration-300 py-3 rounded-sm font-semibold mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="w-full text-secondary-foreground hover:bg-secondary/80 transition duration-300 py-3 rounded-sm font-semibold mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
                     DOWNLOAD SELECTED
                 </button>
             </div>
