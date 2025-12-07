@@ -14,7 +14,6 @@
             theme: {
                 extend: {
                     colors: {
-                        // Cyber theme color map (Approximations of your OKLCH values)
                         'background': '#1f202b',
                         'foreground': '#e6f0ff',
                         'card': '#242633',
@@ -37,17 +36,15 @@
     </script>
     
     <style>
-        /* Custom styling for the select box to match the cyber theme aesthetic */
+        /* Custom styling for the select box */
         .cyber-select {
-            /* Tailwind classes applied via the CDN and config */
             background-color: var(--color-input); 
             color: var(--color-foreground);
             border: 1px solid var(--color-primary); 
             padding: 0.5rem;
             border-radius: 0.125rem;
-            box-shadow: inset 0 0 5px var(--color-primary)33; /* Inner shadow effect */
+            box-shadow: inset 0 0 5px var(--color-primary)33;
             height: 3rem;
-            /* Default appearance removal and custom arrow for the select box */
             appearance: none; 
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -57,7 +54,7 @@
             background-size: 0.65em auto;
         }
 
-        /* Animated gradient background (Custom CSS/Animations) */
+        /* Animated gradient background */
         @keyframes gradient-shift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -68,7 +65,7 @@
             animation: gradient-shift 15s ease infinite;
         }
 
-        /* Cyber glow effect (Custom CSS) */
+        /* Cyber glow effect */
         .cyber-glow {
             box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff80;
         }
@@ -97,51 +94,74 @@
                 $("#select_format").html('<option value="">Fetching formats...</option>');
                 setUIState(true);
 
-                // Use the relative path for your local Docker service
-                $.get('./video_info.php?video_url=' + url, function (data) {
+                // Encode the URL before sending it
+                $.get('./video_info.php?video_url=' + encodeURIComponent(url), function (data) {
                     setUIState(false);
                     
                     if (typeof data === 'string') {
                         try {
                             data = JSON.parse(data);
                         } catch (err) {
-                            alert('Error: Failed to parse server response.');
+                            alert('Error: Failed to parse server response. Check console for raw data.');
+                            console.error("Failed to parse JSON:", data);
+                            $("#select_format").html('<option value="">Parsing failed</option>');
                             return;
                         }
                     }
-
-                    let links = data['links'];
-                    let error = data['error'];
-
-                    if (error) {
-                        alert('Error Message: ' + error);
-                        $("#select_format").html('<option value="">No formats found</option>');
+                    
+                    // Handle the clean error response from video_info.php
+                    if (data.error) {
+                        alert('Server Error: ' + data.error + (data.details ? "\nDetails: " + data.details : ""));
+                        $("#select_format").html('<option value="">' + data.error + '</option>');
                         return;
                     }
 
-                    if (!links || links.length === 0) {
-                        alert('No video links were found!');
+                    // CRITICAL FIX: The new backend uses the 'formats' key
+                    let formats = data.formats;
+
+                    if (!formats || formats.length === 0) {
+                        alert('No usable video formats were found!');
                         $("#select_format").html('<option value="">No formats found</option>');
                         return;
                     }
 
                     let formatOptions = '<option value="">Select a format...</option>';
+                    let videoTitle = data.title || 'video'; // Get the title for the download filename
                     
-                    // Populate the select box with available formats
-                    links.forEach(function(link) {
-                        // Value stores the actual download URL for easy access
-                        let optionValue = link.url;
-                        // Display text shows the user the format and quality
-                        let optionText = link.format; 
+                    // Filter and display formats
+                    formats.forEach(function(f) {
+                        // Filter out formats missing essential properties or are unusable (like combined streams)
+                        if (!f.format_id || f.vcodec === 'none' && f.acodec === 'none' || f.downloader_options) {
+                            return;
+                        }
                         
-                        formatOptions += '<option value="' + optionValue + '">' + optionText + '</option>';
+                        // Calculate human-readable size
+                        let size = f.filesize ? (f.filesize / 1024 / 1024).toFixed(2) + ' MB' : (f.filesize_approx ? ' ~' + (f.filesize_approx / 1024 / 1024).toFixed(2) + ' MB' : ' (Size unknown)');
+                        
+                        // Determine resolution or audio status
+                        let resolution;
+                        if (f.vcodec !== 'none' && f.height) {
+                            resolution = f.height + 'p';
+                        } else if (f.acodec !== 'none' && f.ext === 'mp3' || f.ext === 'm4a') {
+                            resolution = 'Audio Only';
+                        } else {
+                            resolution = 'Stream Only';
+                        }
+
+                        let codec = f.ext ? f.ext.toUpperCase() : 'Unknown';
+
+                        let optionText = `${codec} - ${resolution} [${size}] - ID: ${f.format_id}`;
+                        
+                        // Value stores the format_id for the download.php script
+                        // data-url stores the video URL, data-filename stores the video title
+                        formatOptions += `<option value="${f.format_id}" data-url="${encodeURIComponent(url)}" data-filename="${encodeURIComponent(videoTitle)}">${optionText}</option>`;
                     });
 
                     $('#select_format').html(formatOptions);
-                    $("#btn_download").addClass('cyber-glow'); // Highlight download button when options are ready
-                }).fail(function() {
+                    $("#btn_download").addClass('cyber-glow');
+                }).fail(function(jqXHR, textStatus, errorThrown) {
                     setUIState(false);
-                    alert('Failed to connect to the video information service.');
+                    alert(`Failed to connect to the service. Status: ${textStatus}, Error: ${errorThrown}. Ensure Docker is running.`);
                     $("#select_format").html('<option value="">Connection error</option>');
                 });
             });
@@ -149,15 +169,18 @@
             // --- DOWNLOAD SELECTED FORMAT ---
             $("#btn_download").click(function (e) {
                 e.preventDefault();
-                let selectedUrl = $("#select_format").val();
+                let selectedOption = $("#select_format option:selected");
+                let formatId = selectedOption.val();
+                let videoUrl = selectedOption.data('url');
+                let filename = selectedOption.data('filename');
                 
-                if (!selectedUrl) {
+                if (!formatId) {
                     alert('Please select a video format first.');
                     return;
                 }
 
-                // Construct the download link using the selected URL
-                let downloadLink = './download.php?video_url=' + encodeURIComponent(selectedUrl);
+                // Construct the download link for the new download.php script
+                let downloadLink = `./download.php?video_url=${videoUrl}&format_id=${formatId}&filename=${filename}`;
                 
                 // Navigate to the download PHP script
                 window.location.href = downloadLink;

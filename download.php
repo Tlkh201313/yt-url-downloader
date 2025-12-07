@@ -1,42 +1,34 @@
 <?php
 
-    $file = $_SERVER['QUERY_STRING'] ?? null;
+// Must pass a video_url
+$url = $_GET["video_url"] ?? null;
+if (!$url) {
+    die("Missing video_url parameter");
+}
 
-    if ($file === null || substr($file, 0, 18) !== 'video_url=https://') {
-        die('Cannot find the video_url URL parameter');
-    }
+// Must pass format_id (e.g., 18, 22, 137, 251, etc.)
+$format = $_GET["format_id"] ?? null;
+if (!$format) {
+    die("Missing format_id parameter");
+}
 
-    $file = substr($file, 10);
+// Safe temp file
+$tmpFile = "/tmp/video_" . uniqid() . ".mp4";
 
-    $headers = array_change_key_case(get_headers($file, true));
+// Download chosen format
+$cmd = "yt-dlp -f " . escapeshellarg($format) . " -o " . escapeshellarg($tmpFile) . " " . escapeshellarg($url) . " 2>&1";
+exec($cmd, $output, $status);
 
-    $fileSize = (array)$headers['content-length'];
+if ($status !== 0 || !file_exists($tmpFile)) {
+    die("Download failed: " . implode("\n", $output));
+}
 
-    if (count($fileSize) === 0) {
-        die('Cannot fetch the file size');
-    }
+// Output file to browser
+header("Content-Type: application/octet-stream");
+header("Content-Disposition: attachment; filename=video.mp4");
+header("Content-Length: " . filesize($tmpFile));
+readfile($tmpFile);
 
-    if (strpos('404 Not Found', $headers[0]) === false) {
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename=videoplayback.mp4');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-        header('Content-Length: ' . $fileSize[count($fileSize)-1]);
-        echo "downloading";
-        ob_clean();
-        flush();
-        readfile($file);
-        exit;
-    } else {
-        die($file . " is not found...\n");
-    }
-
-    while(true) {
-        echo "\n";
-        if (connection_status() != 0) {
-            die;
-        }
-    }
+// Remove temp file
+unlink($tmpFile);
+exit;
