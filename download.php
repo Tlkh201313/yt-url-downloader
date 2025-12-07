@@ -18,7 +18,7 @@ $format_id = $_GET["format_id"] ?? "bestvideo";
 // Safe temp file
 $tmpFile = "/tmp/" . uniqid() . ".mp4";
 
-// --- FIX: Robust Merge Command ---
+// Robust Merge Command
 // -f [ID]+bestaudio: Merges the selected video stream with the best audio stream.
 // --merge-output-format mp4: Ensures the final file is MP4.
 // --downloader ffmpeg: Explicitly uses ffmpeg for the merging step.

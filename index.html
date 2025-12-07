@@ -1,3 +1,4 @@
+[Content from pastecontent.txt]
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -232,11 +233,6 @@
     </style>
 
     <script>
-        // --- NEW: Explicitly define the local API endpoint for Docker testing ---
-        // This is necessary because GitHub Pages cannot run PHP.
-        const API_ENDPOINT = 'http://localhost:5000/video_info.php';
-        // --- END NEW ---
-
         // Function to extract YouTube Video ID from URL
         function getVideoId(url) {
             const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|gaming\.youtube\.com\/watch\?.*v=)([^&]+)/i);
@@ -282,8 +278,8 @@
                 setUIState(true);
                 setDownloadIndicator(false); // Hide download progress when starting fetch
 
-                // --- MODIFIED: Use the defined API_ENDPOINT ---
-                $.get(API_ENDPOINT + '?video_url=' + encodeURIComponent(url), function (data) {
+                // Encode the URL before sending it
+                $.get('./video_info.php?video_url=' + encodeURIComponent(url), function (data) {
                     setUIState(false);
                   
                     if (typeof data === 'string') {
@@ -296,7 +292,6 @@
                             return;
                         }
                     }
-                    // --- END MODIFIED ---
                     
                     // Handle the clean error response from video_info.php
                     if (data.error) {

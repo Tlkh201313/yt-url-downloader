@@ -1,5 +1,5 @@
 <?php
-// FIX 1: CORS Header - Allows the frontend (GitHub Pages) to communicate with the local backend (localhost:5000)
+// FIX: CORS Header - Allows the frontend (GitHub Pages) to communicate with the local backend (localhost:5000)
 header("Access-Control-Allow-Origin: *"); 
 
 // Always return JSON
