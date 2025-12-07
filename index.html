@@ -3,59 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web-based YouTube Downloader</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <title>Cyber YouTube Downloader</title>
     
-    <style>
-        .container {
-            width: auto;
-            max-width: 680px;
-            padding: 0 15px;
-        }
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-        .footer {
-            background-color: #f5f5f5;
-        }
-
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Cyber theme color map (Approximations of your OKLCH values)
+                        'background': '#1f202b',
+                        'foreground': '#e6f0ff',
+                        'card': '#242633',
+                        'primary': '#00ffff', // Bright Cyan
+                        'primary-foreground': '#1f202b',
+                        'secondary': '#a020f0', // Purple Neon
+                        'secondary-foreground': '#1f202b',
+                        'muted': '#33354a',
+                        'muted-foreground': '#94b3c4',
+                        'accent': '#ff33d1', // Pink Neon
+                        'accent-foreground': '#1f202b',
+                        'destructive': '#cd3a2f',
+                        'border': '#33354a',
+                        'input': '#33354a',
+                        'ring': '#00ffff',
+                    },
+                }
             }
         }
-    </style>
+    </script>
     
+    <style>
+        /* Custom styling for the select box to match the cyber theme aesthetic */
+        .cyber-select {
+            /* Tailwind classes applied via the CDN and config */
+            background-color: var(--color-input); 
+            color: var(--color-foreground);
+            border: 1px solid var(--color-primary); 
+            padding: 0.5rem;
+            border-radius: 0.125rem;
+            box-shadow: inset 0 0 5px var(--color-primary)33; /* Inner shadow effect */
+            height: 3rem;
+            /* Default appearance removal and custom arrow for the select box */
+            appearance: none; 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='oklch(0.7 0.2 200)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%;
+            background-size: 0.65em auto;
+        }
+
+        /* Animated gradient background (Custom CSS/Animations) */
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .cyber-gradient {
+            background: linear-gradient(-45deg, #1f202b, #242633, #2b2e3e, #1f202b);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
+        }
+
+        /* Cyber glow effect (Custom CSS) */
+        .cyber-glow {
+            box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff80;
+        }
+    </style>
+
     <script>
         $(function () {
+            // Function to enable/disable UI elements
+            function setUIState(isDisabled) {
+                $("#btn_fetch, #btn_download, #txt_url, #select_format").attr('disabled', isDisabled);
+                if (isDisabled) {
+                    $("#btn_download").removeClass('cyber-glow');
+                }
+            }
+
+            // --- FETCH VIDEO INFORMATION ---
             $("#btn_fetch").click(function (e) {
                 e.preventDefault(); 
                 let url = $("#txt_url").val();
-                let oThis = $(this);
-                oThis.attr('disabled', true);
+                
+                if (!url) {
+                    alert('Please paste a video URL.');
+                    return;
+                }
+                
+                $("#select_format").html('<option value="">Fetching formats...</option>');
+                setUIState(true);
 
-                // FIX: Using relative path for local Docker service instead of external API
+                // Use the relative path for your local Docker service
                 $.get('./video_info.php?video_url=' + url, function (data) {
-                    console.log(data);
-
-                    oThis.attr('disabled', false);
-
-                    // Ensure data is parsed as JSON if it came as a string
+                    setUIState(false);
+                    
                     if (typeof data === 'string') {
                         try {
                             data = JSON.parse(data);
                         } catch (err) {
                             alert('Error: Failed to parse server response.');
-                            return false;
+                            return;
                         }
                     }
 
@@ -64,71 +115,91 @@
 
                     if (error) {
                         alert('Error Message: ' + error);
-                        return false;
+                        $("#select_format").html('<option value="">No formats found</option>');
+                        return;
                     }
 
                     if (!links || links.length === 0) {
                         alert('No video links were found!');
-                        return false;
+                        $("#select_format").html('<option value="">No formats found</option>');
+                        return;
                     }
 
-                    let tbodyVideoLists = '';
-                    let dataIndex = 1;
-                    let downloadLink = '';
+                    let formatOptions = '<option value="">Select a format...</option>';
                     
-                    for (index in links) {
-                        downloadLink = './download.php?video_url=' + encodeURIComponent(links[index]['url']);
+                    // Populate the select box with available formats
+                    links.forEach(function(link) {
+                        // Value stores the actual download URL for easy access
+                        let optionValue = link.url;
+                        // Display text shows the user the format and quality
+                        let optionText = link.format; 
+                        
+                        formatOptions += '<option value="' + optionValue + '">' + optionText + '</option>';
+                    });
 
-                        tbodyVideoLists += '<tr>';
-                        tbodyVideoLists += '<th scope="row">' + dataIndex + '</th>';
-                        tbodyVideoLists += '<td>' + links[index]['format'] + '</td>';
-                        tbodyVideoLists += '<td>' + links[index]['itag'] + '</td>';
-                        // Translated: '下載' to 'Download'
-                        tbodyVideoLists += '<td><a href="' + downloadLink + '">Download</a></td>';
-                        tbodyVideoLists += '</tr>';
-                        dataIndex += 1;
-                    }
-
-                    $('#video-lists').html(tbodyVideoLists);
+                    $('#select_format').html(formatOptions);
+                    $("#btn_download").addClass('cyber-glow'); // Highlight download button when options are ready
+                }).fail(function() {
+                    setUIState(false);
+                    alert('Failed to connect to the video information service.');
+                    $("#select_format").html('<option value="">Connection error</option>');
                 });
+            });
+
+            // --- DOWNLOAD SELECTED FORMAT ---
+            $("#btn_download").click(function (e) {
+                e.preventDefault();
+                let selectedUrl = $("#select_format").val();
+                
+                if (!selectedUrl) {
+                    alert('Please select a video format first.');
+                    return;
+                }
+
+                // Construct the download link using the selected URL
+                let downloadLink = './download.php?video_url=' + encodeURIComponent(selectedUrl);
+                
+                // Navigate to the download PHP script
+                window.location.href = downloadLink;
             });
         });
     </script>
 </head>
-<body>
-    <main role="main" class="flex-shrink-0">
-        <div class="container">
-          <h1 class="mt-5">Web YouTube Downloader</h1>
-          <div class="row justify-content-left">
-            <div class="col-12 col-md-12 col-lg-12">
-                <form class="card card-sm">
-                    <div class="card-body row no-gutters align-items-center">
-                        <div class="col-auto">
-                            <i class="fas fa-search h4 text-body"></i>
-                        </div>
-                        <div class="col">
-                            <input id="txt_url" class="form-control form-control-lg" type="text" placeholder="Paste YouTube Video URL here">
-                        </div>
-                        <div class="col-auto">
-                            <button id="btn_fetch" class="btn btn-lg btn-success" type="button">Fetch</button>
-                        </div>
-                        </div>
-                </form>
+<body class="cyber-gradient min-h-screen p-4 flex items-start justify-center">
+    <main class="w-full max-w-xl mx-auto mt-20">
+        <div class="bg-card text-foreground p-8 rounded-lg shadow-xl border border-primary/50 cyber-glow">
+            <h1 class="text-3xl font-bold mb-6 text-primary tracking-wider border-b border-secondary/50 pb-2">
+                CYBER DRAIN
+            </h1>
+            <p class="text-sm text-muted-foreground mb-6">
+                Enter a YouTube URL to retrieve available download streams.
+            </p>
+
+            <div class="flex space-x-2 mb-6">
+                <input id="txt_url" type="text" placeholder="Paste YouTube Video URL here" 
+                       class="flex-grow p-3 bg-input border border-border focus:border-primary/80 focus:ring-1 focus:ring-primary/50 rounded-sm text-foreground placeholder-muted-foreground transition duration-300">
+                
+                <button id="btn_fetch" 
+                        class="bg-primary text-primary-foreground hover:bg-primary/80 transition duration-300 px-6 py-3 rounded-sm font-semibold">
+                    Fetch
+                </button>
             </div>
+
+            <div class="space-y-4">
+                <label for="select_format" class="text-sm font-medium text-secondary">
+                    Select Format Stream:
+                </label>
+                <div class="relative">
+                    <select id="select_format" class="w-full cyber-select">
+                        <option value="">Enter URL and click Fetch</option>
+                    </select>
+                </div>
+
+                <button id="btn_download" disabled
+                        class="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition duration-300 py-3 rounded-sm font-semibold mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                    DOWNLOAD SELECTED
+                </button>
             </div>
-            <div class="row justify-content-left">
-          <table class="table">
-            <thead class="thead-dark">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Video Format</th> 
-                <th scope="col">itag</th>
-                <th scope="col">Download Link</th>
-              </tr>
-            </thead>
-            <tbody id="video-lists"></tbody>
-          </table>
-          </div>
         </div>
     </main>
 </body>
