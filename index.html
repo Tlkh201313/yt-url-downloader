@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber YouTube Downloader</title>
+    <title>YouTube Installer</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script>
@@ -17,13 +16,13 @@
                         'background': '#0a0e27',
                         'foreground': '#e6f0ff',
                         'card': '#1a1f3a',
-                        'primary': '#00ffff',
+                        'primary': '#00ffff', // Bright Cyan
                         'primary-foreground': '#0a0e27',
-                        'secondary': '#a020f0',
+                        'secondary': '#a020f0', // Purple Neon
                         'secondary-foreground': '#0a0e27',
                         'muted': '#2a2f4a',
                         'muted-foreground': '#94b3c4',
-                        'accent': '#ff33d1',
+                        'accent': '#ff33d1', // Pink Neon
                         'accent-foreground': '#0a0e27',
                         'destructive': '#cd3a2f',
                         'border': '#2a2f4a',
@@ -36,353 +35,329 @@
     </script>
     
     <style>
-        /* Root variables for easier color management */
+        /* Root variables */
         :root {
             --color-primary: #00ffff;
             --color-secondary: #a020f0;
             --color-accent: #ff33d1;
             --color-background: #0a0e27;
-            --color-foreground: #e6f0ff;
-            --color-input: #1a1f3a;
-            --color-border: #2a2f4a;
+            --color-input: #1a1f3a; /* Added for clarity */
+            --color-foreground: #e6f0ff; /* Added for clarity */
         }
 
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Enhanced body styling */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             letter-spacing: 0.5px;
+            height: auto; 
+            min-height: 100vh;
         }
 
-        /* Animated gradient background with multiple layers */
+        /* Animations */
         @keyframes gradient-shift {
-            0%, 100% { 
-                background-position: 0% 50%;
-            }
-            50% { 
-                background-position: 100% 50%;
-            }
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
-
         @keyframes scanline-animation {
-            0% {
-                transform: translateY(-100%);
-            }
-            100% {
-                transform: translateY(100vh);
-            }
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
         }
-
-        @keyframes pulse-glow {
-            0%, 100% {
-                opacity: 1;
-                filter: brightness(1);
-            }
-            50% {
-                opacity: 0.85;
-                filter: brightness(1.15);
-            }
-        }
-
-        @keyframes float-animation {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; text-shadow: 0 0 4px var(--color-primary), 0 0 8px var(--color-primary); }
+            20%, 24%, 55% { opacity: 0.5; text-shadow: none; }
         }
 
         .cyber-gradient {
-            background: linear-gradient(
-                -45deg,
-                #0a0e27,
-                #1a1f3a,
-                #2a2f4a,
-                #1a1f3a,
-                #0a0e27
-            );
+            background: linear-gradient(-45deg, #0a0e27, #1a1f3a, #2a2f4a, #1a1f3a, #0a0e27);
             background-size: 400% 400%;
             animation: gradient-shift 20s ease infinite;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+        }
+        .cyber-gradient::before { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.3), transparent);
+            animation: scanline-animation 8s linear infinite; pointer-events: none; z-index: 9999;
+        }
+        .cyber-gradient::after { 
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px; pointer-events: none; z-index: 1;
         }
 
-        /* Scanline overlay effect */
-        .cyber-gradient::before {
-            content: '';
-            position: fixed;
+        /* Header Styling */
+        .cyber-header {
+            border-bottom: 3px solid var(--color-secondary);
+            box-shadow: 0 4px 15px rgba(160, 32, 240, 0.3);
+            background-color: rgba(10, 14, 39, 0.9);
+            backdrop-filter: blur(5px);
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(
-                to bottom,
-                transparent,
-                rgba(0, 255, 255, 0.3),
-                transparent
-            );
-            animation: scanline-animation 8s linear infinite;
-            pointer-events: none;
-            z-index: 9999;
+            z-index: 50;
+        }
+        
+        /* Logo Styling */
+        .cyber-logo {
+            font-family: 'Courier New', monospace;
+            font-size: 1.75rem;
+            letter-spacing: 3px;
+            color: var(--color-primary);
+            animation: flicker 4s infinite alternate;
+            display: flex;
+            align-items: center;
+        }
+        .cyber-logo-icon {
+            font-size: 2.25rem;
+            line-height: 1;
+            margin-right: 0.5rem;
+            text-shadow: 0 0 10px var(--color-accent), 0 0 20px var(--color-accent);
+            color: var(--color-accent);
         }
 
-        /* Grid pattern overlay */
-        .cyber-gradient::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Enhanced cyber glow effect */
+        /* Card Hover Effect */
         .cyber-glow {
-            box-shadow: 
-                0 0 5px rgba(0, 255, 255, 0.3),
-                0 0 10px rgba(0, 255, 255, 0.5),
-                0 0 20px rgba(0, 255, 255, 0.3),
-                0 0 40px rgba(0, 255, 255, 0.1),
-                inset 0 0 10px rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.3), 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 10px rgba(0, 255, 255, 0.1); 
             transition: all 0.3s ease;
         }
 
         .cyber-glow:hover {
-            box-shadow: 
-                0 0 8px rgba(0, 255, 255, 0.5),
-                0 0 15px rgba(0, 255, 255, 0.7),
-                0 0 30px rgba(0, 255, 255, 0.4),
-                0 0 50px rgba(0, 255, 255, 0.2),
-                inset 0 0 15px rgba(0, 255, 255, 0.15);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5), 0 0 15px rgba(0, 255, 255, 0.7), 0 0 30px rgba(0, 255, 255, 0.4), 0 0 50px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.15);
+        }
+        
+        /* Input Focus Effect */
+        input:focus {
+            border-color: var(--color-accent) !important;
+            box-shadow: 0 0 10px rgba(255, 51, 209, 0.5);
+            outline: none;
+        }
+        
+        /* Button style updates */
+        #btn_fetch {
+            background: linear-gradient(135deg, #00ffff, #00cccc);
+            border: 3px solid #00ffff; 
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5), inset 0 0 8px #00ffff88;
+        }
+        
+        #btn_download {
+            background: linear-gradient(135deg, #a020f0, #8010d0);
+            border: 3px solid #ff33d1; 
+            box-shadow: 0 0 15px rgba(255, 51, 209, 0.5), inset 0 0 8px #a020f088;
         }
 
-        /* Secondary glow for purple accent */
-        .cyber-glow-secondary {
-            box-shadow: 
-                0 0 5px rgba(160, 32, 240, 0.3),
-                0 0 10px rgba(160, 32, 240, 0.5),
-                0 0 20px rgba(160, 32, 240, 0.3),
-                0 0 40px rgba(160, 32, 240, 0.1);
+        /* Ad Banner Style */
+        .ad-banner {
+            height: 100px;
+            background-color: #000033;
+            border: 3px solid #ff33d1;
+            box-shadow: 0 0 15px #ff33d155, inset 0 0 10px #00ffff1a;
+            text-shadow: 0 0 5px #ff33d1;
+            letter-spacing: 1.5px;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Accent glow for pink */
-        .cyber-glow-accent {
-            box-shadow: 
-                0 0 5px rgba(255, 51, 209, 0.3),
-                0 0 10px rgba(255, 51, 209, 0.5),
-                0 0 20px rgba(255, 51, 209, 0.3);
+        /* Progress Bar Animation */
+        @keyframes loading-stripes {
+            0% { background-position: 1rem 0; }
+            100% { background-position: 0 0; }
         }
-
-        /* Pulse animation class */
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
+        .loading-progress {
+            background-color: theme('colors.muted');
+            background-image: linear-gradient(
+                -45deg, 
+                theme('colors.primary') 25%, 
+                transparent 25%, 
+                transparent 50%, 
+                theme('colors.primary') 50%, 
+                theme('colors.primary') 75%, 
+                transparent 75%, 
+                transparent
+            );
+            background-size: 1rem 1rem;
+            animation: loading-stripes 0.5s linear infinite;
         }
-
-        /* Float animation for cards */
-        .float-animation {
-            animation: float-animation 3s ease-in-out infinite;
-        }
-
-        /* Enhanced select box styling */
-        .cyber-select {
+        
+        /* ---------------------------------- */
+        /* NEW: Custom Dropdown Styling */
+        /* ---------------------------------- */
+        
+        #custom_select_box {
+            position: relative;
             background-color: var(--color-input);
             color: var(--color-foreground);
             border: 2px solid var(--color-primary);
-            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            padding: 0.75rem 1rem;
             border-radius: 0.25rem;
-            box-shadow: 
-                inset 0 0 10px rgba(0, 255, 255, 0.1),
-                0 0 10px rgba(0, 255, 255, 0.2);
-            height: 3rem;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem top 50%;
-            background-size: 1.2em auto;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 3rem;
             font-weight: 500;
             letter-spacing: 0.5px;
+            user-select: none;
+            z-index: 10; /* Above the options list when open */
+        }
+        
+        #custom_select_box:hover {
+            border-color: var(--color-accent);
+            box-shadow: inset 0 0 10px rgba(255, 51, 209, 0.3), 0 0 10px rgba(255, 51, 209, 0.3);
         }
 
-        .cyber-select:hover {
-            border-color: #00ffff;
-            box-shadow: 
-                inset 0 0 15px rgba(0, 255, 255, 0.15),
-                0 0 15px rgba(0, 255, 255, 0.3);
+        /* Arrow Icon (using unicode triangle) */
+        #custom_select_box::after {
+            content: '▼';
+            font-size: 0.8rem;
+            color: var(--color-primary);
+            transition: transform 0.3s;
+        }
+        /* Rotate arrow when open */
+        #custom_select_box.open::after {
+            transform: rotate(180deg);
+            color: var(--color-accent);
         }
 
-        .cyber-select:focus {
-            outline: none;
-            border-color: #00ffff;
-            box-shadow: 
-                inset 0 0 20px rgba(0, 255, 255, 0.2),
-                0 0 20px rgba(0, 255, 255, 0.4);
+        /* The Options List Container */
+        #custom_options_list {
+            position: absolute;
+            top: 100%; /* Position right below the select box */
+            left: 0;
+            right: 0;
+            max-height: 200px; /* Max height for scrolling */
+            overflow-y: auto;
+            background-color: var(--color-input);
+            border: 2px solid var(--color-secondary);
+            border-top: none;
+            border-radius: 0 0 0.25rem 0.25rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(160, 32, 240, 0.3);
+            z-index: 5; /* Below the select box */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px); /* Start slightly above for slide effect */
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
         }
 
-        .cyber-select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Enhanced input styling */
-        input[type="text"] {
-            transition: all 0.3s ease;
-            border-radius: 0.25rem;
-        }
-
-        input[type="text"]:focus {
-            box-shadow: 
-                inset 0 0 10px rgba(0, 255, 255, 0.1),
-                0 0 15px rgba(0, 255, 255, 0.3);
-        }
-
-        /* Enhanced button styling */
-        button {
-            transition: all 0.3s ease;
-            border-radius: 0.25rem;
-            font-weight: 600;
-            letter-spacing: 0.75px;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Fetch button styling */
-        #btn_fetch {
-            background: linear-gradient(135deg, #00ffff, #00cccc);
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
-
-        #btn_fetch:hover:not(:disabled) {
-            background: linear-gradient(135deg, #00ffff, #00ffff);
-            box-shadow: 
-                0 0 15px rgba(0, 255, 255, 0.5),
-                0 0 30px rgba(0, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        #btn_fetch:active:not(:disabled) {
+        #custom_options_list.open {
+            opacity: 1;
+            visibility: visible;
             transform: translateY(0);
         }
 
-        /* Download button styling */
-        #btn_download {
-            background: linear-gradient(135deg, #a020f0, #8010d0);
-            border: 2px solid #a020f0;
-            box-shadow: 0 0 10px rgba(160, 32, 240, 0.3);
+        /* Individual Option Item */
+        .custom-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
         }
 
-        #btn_download:hover:not(:disabled) {
-            background: linear-gradient(135deg, #a020f0, #a020f0);
-            box-shadow: 
-                0 0 15px rgba(160, 32, 240, 0.5),
-                0 0 30px rgba(160, 32, 240, 0.3);
-            transform: translateY(-2px);
+        .custom-option:last-child {
+            border-bottom: none;
         }
 
-        #btn_download:active:not(:disabled) {
-            transform: translateY(0);
+        .custom-option:hover {
+            background-color: rgba(160, 32, 240, 0.2); /* Secondary color hover */
+            color: var(--color-accent); /* Accent color text */
+        }
+        
+        .custom-option.selected {
+            background-color: rgba(0, 255, 255, 0.2); /* Primary color background */
+            font-weight: bold;
+            color: var(--color-primary);
         }
 
-        #btn_download:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* Card styling with enhanced effects */
-        .card-enhanced {
-            background: rgba(26, 31, 58, 0.8);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 255, 255, 0.2);
-            box-shadow: 
-                0 8px 32px rgba(0, 255, 255, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .card-enhanced:hover {
-            border-color: rgba(0, 255, 255, 0.4);
-            box-shadow: 
-                0 12px 48px rgba(0, 255, 255, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        }
-
-        /* Title styling */
-        h1 {
-            text-shadow: 
-                0 0 10px rgba(0, 255, 255, 0.5),
-                0 0 20px rgba(0, 255, 255, 0.3);
-            animation: pulse-glow 3s ease-in-out infinite;
-        }
-
-        /* Label styling */
-        label {
-            text-shadow: 0 0 5px rgba(160, 32, 240, 0.3);
-        }
-
-        /* Smooth transitions for all interactive elements */
-        * {
-            transition: color 0.3s ease, border-color 0.3s ease;
-        }
-
-        /* Remove default outline and use custom focus styles */
-        *:focus {
-            outline: none;
-        }
-
-        /* Placeholder styling */
-        ::placeholder {
-            color: rgba(148, 179, 196, 0.6);
-        }
-
-        /* Selection styling */
-        ::selection {
-            background: rgba(0, 255, 255, 0.3);
-            color: var(--color-foreground);
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0, 255, 255, 0.5);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 255, 255, 0.7);
-        }
     </style>
 
     <script>
+        // Function to extract YouTube Video ID from URL
+        function getVideoId(url) {
+            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|v\/)|gaming\.youtube\.com\/watch\?.*v=)([^&]+)/i);
+            return (match && match[1]) ? match[1] : null;
+        }
+
         $(function () {
+            // Variable to hold the currently selected format's data (used for download)
+            let selectedFormatData = null;
+
+            // --- CUSTOM DROPDOWN TOGGLE LOGIC ---
+            $("#custom_select_box").on('click', function(e) {
+                e.stopPropagation(); // Prevent closing if click originated inside the box
+                
+                // Only allow opening if it's not disabled (e.g., during fetch)
+                if (!$("#btn_fetch").prop('disabled')) {
+                    $("#custom_options_list").toggleClass('open');
+                    $(this).toggleClass('open');
+                }
+            });
+
+            // Close the dropdown when clicking anywhere else on the page
+            $(document).on('click', function() {
+                $("#custom_options_list").removeClass('open');
+                $("#custom_select_box").removeClass('open');
+            });
+
+            // Handler for selecting an option
+            $(document).on('click', '#custom_options_list .custom-option', function() {
+                const $option = $(this);
+                const formatId = $option.data('format-id');
+                
+                // Update the visual representation
+                $("#selected_format_value").text($option.text());
+                
+                // Update the internal data for download
+                selectedFormatData = {
+                    format_id: formatId,
+                    video_url: $option.data('url'),
+                    filename: $option.data('filename')
+                };
+
+                // Enable the download button
+                $("#btn_download").prop('disabled', false).addClass('cyber-glow');
+
+                // Highlight the selected item (optional)
+                $('#custom_options_list .custom-option').removeClass('selected');
+                $option.addClass('selected');
+            });
+            // --- END CUSTOM DROPDOWN LOGIC ---
+            
             // Function to enable/disable UI elements
             function setUIState(isDisabled) {
-                $("#btn_fetch, #btn_download, #txt_url, #select_format").attr('disabled', isDisabled);
+                // Disable fetch button, URL input
+                $("#btn_fetch, #txt_url").attr('disabled', isDisabled);
+                // Disable download button by default until a new format is selected
+                $("#btn_download").prop('disabled', true).removeClass('cyber-glow');
+                
+                // Disable the custom select box interaction (visually handled by the button state, but important for preventing errors)
+                $("#custom_select_box").prop('disabled', isDisabled);
+                
                 if (isDisabled) {
-                    $("#btn_download").removeClass('cyber-glow');
+                    $("#video_info_box").hide(); 
+                    $("#fetch_progress").show(); 
+                    $("#select_format_wrapper").hide();
+                    $("#custom_select_box").removeClass('open');
+                    $("#custom_options_list").removeClass('open');
+                } else {
+                    $("#fetch_progress").hide(); 
+                    $("#select_format_wrapper").show(); 
                 }
             }
+            
+            // Function to show/hide download indicator separately
+            function setDownloadIndicator(isVisible) {
+                if (isVisible) {
+                    $("#download_progress").show();
+                    $("#download_progress_text").text("Download preparing on server...");
+                } else {
+                    $("#download_progress").hide();
+                    $("#download_progress_text").text("");
+                }
+            }
+
 
             // --- FETCH VIDEO INFORMATION ---
             $("#btn_fetch").click(function (e) {
@@ -394,58 +369,77 @@
                     return;
                 }
                 
-                $("#select_format").html('<option value="">Fetching formats...</option>');
+                // Reset custom select and internal data
+                $("#selected_format_value").text('Fetching formats...');
+                $("#custom_options_list").html('');
+                selectedFormatData = null;
+
                 setUIState(true);
+                setDownloadIndicator(false); 
 
                 // Encode the URL before sending it
                 $.get('./video_info.php?video_url=' + encodeURIComponent(url), function (data) {
                     setUIState(false);
-                    
+   
                     if (typeof data === 'string') {
                         try {
                             data = JSON.parse(data);
                         } catch (err) {
-                            alert('Error: Failed to parse server response. Check console for raw data.');
+                            alert('Error: Failed to parse server response. A syntax error may exist in video_info.php.');
                             console.error("Failed to parse JSON:", data);
-                            $("#select_format").html('<option value="">Parsing failed</option>');
+                            $("#selected_format_value").text('Parsing failed');
                             return;
                         }
                     }
                     
-                    // Handle the clean error response from video_info.php
                     if (data.error) {
                         alert('Server Error: ' + data.error + (data.details ? "\nDetails: " + data.details : ""));
-                        $("#select_format").html('<option value="">' + data.error + '</option>');
+                        $("#selected_format_value").text(data.error);
+                        $("#video_info_box").hide();
                         return;
                     }
 
-                    // CRITICAL FIX: The new backend uses the 'formats' key
                     let formats = data.formats;
+                    let videoId = getVideoId(url);
+                    let videoTitle = data.title || 'video';
+                    
+                    // --- DISPLAY THUMBNAIL AND TITLE ---
+                    if (videoId) {
+                        let thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                        $("#video_info_box").html(`
+                            <div class="flex items-start space-x-4">
+                                <img src="${thumbnailUrl}" alt="Video Thumbnail" class="w-32 h-20 object-cover border-2 border-primary/50 shadow-md">
+                                <div class="flex-grow">
+                                    <p class="text-primary text-md font-semibold mb-1 truncate">${videoTitle}</p>
+                                    <a href="${url}" target="_blank" class="text-accent text-xs hover:underline">${url}</a>
+                                </div>
+                            </div>
+                        `).show();
+                    } else {
+                        $("#video_info_box").html(`<p class="text-primary text-sm font-semibold">Title: ${videoTitle}</p>`).show();
+                    }
+                    // --- END DISPLAY ---
+
 
                     if (!formats || formats.length === 0) {
                         alert('No usable video formats were found!');
-                        $("#select_format").html('<option value="">No formats found</option>');
+                        $("#selected_format_value").text('No formats found');
                         return;
                     }
 
-                    let formatOptions = '<option value="">Select a format...</option>';
-                    let videoTitle = data.title || 'video'; // Get the title for the download filename
+                    let formatOptionsHTML = '';
                     
-                    // Filter and display formats
                     formats.forEach(function(f) {
-                        // Filter out formats missing essential properties or are unusable (like combined streams)
                         if (!f.format_id || f.vcodec === 'none' && f.acodec === 'none' || f.downloader_options) {
                             return;
                         }
                         
-                        // Calculate human-readable size
                         let size = f.filesize ? (f.filesize / 1024 / 1024).toFixed(2) + ' MB' : (f.filesize_approx ? ' ~' + (f.filesize_approx / 1024 / 1024).toFixed(2) + ' MB' : ' (Size unknown)');
                         
-                        // Determine resolution or audio status
                         let resolution;
                         if (f.vcodec !== 'none' && f.height) {
                             resolution = f.height + 'p';
-                        } else if (f.acodec !== 'none' && f.ext === 'mp3' || f.ext === 'm4a') {
+                        } else if (f.acodec !== 'none') {
                             resolution = 'Audio Only';
                         } else {
                             resolution = 'Stream Only';
@@ -455,72 +449,110 @@
 
                         let optionText = `${codec} - ${resolution} [${size}] - ID: ${f.format_id}`;
                         
-                        // Value stores the format_id for the download.php script
-                        // data-url stores the video URL, data-filename stores the video title
-                        formatOptions += `<option value="${f.format_id}" data-url="${encodeURIComponent(url)}" data-filename="${encodeURIComponent(videoTitle)}">${optionText}</option>`;
+                        // Inject into the custom options list
+                        formatOptionsHTML += `<div class="custom-option" data-format-id="${f.format_id}" data-url="${encodeURIComponent(url)}" data-filename="${encodeURIComponent(videoTitle)}">${optionText}</div>`;
                     });
 
-                    $('#select_format').html(formatOptions);
-                    $("#btn_download").addClass('cyber-glow');
+                    $('#custom_options_list').html(formatOptionsHTML);
+                    $("#selected_format_value").text('Select a format...');
+
                 }).fail(function(jqXHR, textStatus, errorThrown) {
                     setUIState(false);
+                    $("#video_info_box").hide();
                     alert(`Failed to connect to the service. Status: ${textStatus}, Error: ${errorThrown}. Ensure Docker is running.`);
-                    $("#select_format").html('<option value="">Connection error</option>');
+                    $("#selected_format_value").text('Connection error');
                 });
             });
 
             // --- DOWNLOAD SELECTED FORMAT ---
             $("#btn_download").click(function (e) {
                 e.preventDefault();
-                let selectedOption = $("#select_format option:selected");
-                let formatId = selectedOption.val();
-                let videoUrl = selectedOption.data('url');
-                let filename = selectedOption.data('filename');
                 
-                if (!formatId) {
+                if (!selectedFormatData) {
                     alert('Please select a video format first.');
                     return;
                 }
-
-                // Construct the download link for the new download.php script
-                let downloadLink = `./download.php?video_url=${videoUrl}&format_id=${formatId}&filename=${filename}`;
                 
-                // Navigate to the download PHP script
+                // Show Download Indicator before starting file stream
+                setDownloadIndicator(true); 
+
+                // Construct the download link using the stored data
+                let downloadLink = `./download.php?video_url=${selectedFormatData.video_url}&format_id=${selectedFormatData.format_id}&filename=${selectedFormatData.filename}`;
+                
                 window.location.href = downloadLink;
             });
+
+            window.onfocus = function() { setDownloadIndicator(false); };
+            
         });
     </script>
 </head>
-<body class="cyber-gradient min-h-screen p-4 flex items-start justify-center">
-    <main class="w-full max-w-xl mx-auto mt-20 relative z-10">
-        <div class="bg-card text-foreground p-8 rounded-lg shadow-xl border border-primary/50 cyber-glow card-enhanced">
-            <h1 class="text-4xl font-bold mb-6 text-primary tracking-widest border-b-2 border-secondary/50 pb-4">
-                CYBER DRAIN
+<body class="cyber-gradient p-4 flex flex-col items-center">
+    
+    <header class="cyber-header w-full flex justify-center mb-10">
+        <div class="w-full max-w-2xl px-4 py-3 flex justify-between items-center">
+            <h1 class="cyber-logo">
+                <span class="cyber-logo-icon">👑</span>
+                YOUTUBE INSTALLER
             </h1>
+            <span class="text-sm text-muted-foreground hidden sm:block">
+                URL TO FILE ACQUISITION
+            </span>
+        </div>
+    </header>
+
+    <main class="w-full max-w-2xl mx-auto relative z-10">
+        
+        <div class="ad-banner w-full text-center py-8 mb-8 rounded-lg cyber-glow flex items-center justify-center">
+            <h2 class="text-xl font-mono text-accent">ADVERTISEMENT BANNER (728x90)</h2>
+        </div>
+
+        <div class="bg-card text-foreground p-8 rounded-lg shadow-xl border border-primary/50 cyber-glow transition duration-300">
+            <h2 class="text-3xl font-bold mb-6 text-primary tracking-widest border-b-2 border-secondary/50 pb-4">
+                YOUTUBE VIDEO DOWNLOADER
+            </h2>
             <p class="text-sm text-muted-foreground mb-6 leading-relaxed">
-                Enter a YouTube URL to retrieve available download streams.
+                Input the YouTube URL to fetch available video and audio streams.
             </p>
 
             <div class="flex space-x-2 mb-6">
                 <input id="txt_url" type="text" placeholder="Paste YouTube Video URL here" 
-                       class="flex-grow p-3 bg-input border-2 border-border focus:border-primary/80 focus:ring-1 focus:ring-primary/50 rounded-sm text-foreground placeholder-muted-foreground transition duration-300">
+                       class="flex-grow p-3 bg-input border-2 border-border focus:border-accent/80 focus:ring-1 focus:ring-accent/50 rounded-sm text-foreground placeholder-muted-foreground transition duration-300">
                 
                 <button id="btn_fetch" 
                         class="text-primary-foreground hover:bg-primary/80 transition duration-300 px-6 py-3 rounded-sm font-semibold">
-                    Fetch
+                    FETCH DATA
                 </button>
             </div>
 
-            <div class="space-y-4">
-                <label for="select_format" class="text-sm font-medium text-secondary block">
-                    Select Format Stream:
-                </label>
-                <div class="relative">
-                    <select id="select_format" class="w-full cyber-select">
-                        <option value="">Enter URL and click Fetch</option>
-                    </select>
+            <div id="fetch_progress" class="hidden w-full h-2.5 bg-muted rounded-full overflow-hidden mb-4">
+                <div class="w-full h-full loading-progress" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            
+            <div id="download_progress" class="hidden w-full bg-muted rounded-sm overflow-hidden mb-4 p-2 border border-accent/50">
+                <p id="download_progress_text" class="text-accent text-sm mb-1 font-semibold">Download preparing on server...</p>
+                <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div class="w-full h-full loading-progress" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+
+            <div id="video_info_box" class="hidden bg-muted/50 p-4 rounded-sm border border-border mb-6 cyber-glow">
                 </div>
 
+
+            <div class="space-y-4" id="select_format_wrapper">
+                <label for="select_format" class="text-sm font-medium text-secondary block">
+                    SELECT OUTPUT FORMAT:
+                </label>
+                
+                <div class="relative">
+                    <div id="custom_select_box">
+                        <span id="selected_format_value">Enter URL and click Fetch</span>
+                    </div>
+                    <div id="custom_options_list">
+                        </div>
+                </div>
                 <button id="btn_download" disabled
                         class="w-full text-secondary-foreground hover:bg-secondary/80 transition duration-300 py-3 rounded-sm font-semibold mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
                     DOWNLOAD SELECTED
