@@ -3,73 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web-based YouTube Downloader websites</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <title>Cyber YouTube Stream Downloader</title>
+    
+    <link href="style.css" rel="stylesheet"> 
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-    <style>
-        .container {
-            width: auto;
-            max-width: 680px;
-            padding: 0 15px;
-        }
 
-        .footer {
-            background-color: #f5f5f5;
-        }
-
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
-        }
-    </style>
     <script>
         $(function () {
             $("#btn_fetch").click(function (e) {
-                e.preventDefault = false;
+                // Prevent default form submission
+                e.preventDefault(); 
+                
                 let url = $("#txt_url").val();
                 let oThis = $(this);
+                let statusOutput = $('#statusOutput pre');
+
                 oThis.attr('disabled', true);
+                statusOutput.text('INITIATING QUERY: Fetching video information...');
 
-                $.get('https://yt-dlp-api.peterli.website/video/?video_url=' + url, function (data) {
+                // 3. FIX: Use a RELATIVE PATH for your local PHP backend service
+                // This assumes your Nginx/PHP setup handles /video_info.php (or similar)
+                $.get('./video_info.php?video_url=' + url, function (data) {
                     console.log(data);
-
+                    
                     oThis.attr('disabled', false);
+                    statusOutput.text('QUERY COMPLETE.');
+
+                    // Ensure data is parsed as JSON (often needed for older jQuery versions)
+                    if (typeof data === 'string') {
+                        try {
+                            data = JSON.parse(data);
+                        } catch (err) {
+                            statusOutput.text('ERROR: Failed to parse response from server.');
+                            return false;
+                        }
+                    }
 
                     let links = data['links'];
                     let error = data['error'];
 
                     if (error) {
-                        alert('錯誤訊息: ' + error);
+                        alert('ERROR: ' + error);
+                        statusOutput.text('ERROR: ' + error);
                         return false;
                     }
 
-                    if (links.length === 0) {
-                        alert('沒有找到任何的影片連結!');
+                    if (!links || links.length === 0) {
+                        alert('No video links found!');
+                        statusOutput.text('WARNING: No video links found!');
                         return false;
                     }
 
                     let tbodyVideoLists = '';
                     let dataIndex = 1;
                     let downloadLink = '';
+                    
                     for (index in links) {
-                        downloadLink = './download.php?video_url=' + links[index]['url'];
+                        // 4. FIX: Use a RELATIVE PATH for the download script
+                        // Assumes the PHP script that handles the download is 'download.php'
+                        downloadLink = './download.php?video_url=' + encodeURIComponent(links[index]['url']);
 
-                        tbodyVideoLists += '<tr>';
-                        tbodyVideoLists += '<th scope="row">' + dataIndex + '</th>';
-                        tbodyVideoLists += '<td>' + links[index]['format'] + '</td>';
-                        tbodyVideoLists += '<td>' + links[index]['itag'] + '</td>';
-                        tbodyVideoLists += '<td><a href="' + downloadLink  + '">下載</a></td>';
+                        tbodyVideoLists += '<tr class="border-b border-primary/20 hover:bg-secondary/10">';
+                        tbodyVideoLists += '<th scope="row" class="text-primary">' + dataIndex + '</th>';
+                        tbodyVideoLists += '<td class="text-foreground">' + links[index]['format'] + '</td>';
+                        tbodyVideoLists += '<td class="text-muted-foreground">' + links[index]['itag'] + '</td>';
+                        tbodyVideoLists += '<td><a href="' + downloadLink + '" class="text-accent hover:underline">DOWNLOAD</a></td>';
                         tbodyVideoLists += '</tr>';
                         dataIndex += 1;
                     }
@@ -77,48 +76,72 @@
                     $('#video-lists').html(tbodyVideoLists);
                 });
             });
-
         });
     </script>
 </head>
-<body>
-    <main role="main" class="flex-shrink-0">
-        <div class="container">
-          <h1 class="mt-5">Web YouTube Downloader</h1>
-          <div class="row justify-content-left">
-            <div class="col-12 col-md-12 col-lg-12">
-                <form class="card card-sm">
-                    <div class="card-body row no-gutters align-items-center">
-                        <div class="col-auto">
-                            <i class="fas fa-search h4 text-body"></i>
-                        </div>
-                        <!--end of col-->
-                        <div class="col">
-                            <input id="txt_url" class="form-control form-control-lg" type="text" placeholder="請貼上YouTube影片網址">
-                        </div>
-                        <!--end of col-->
-                        <div class="col-auto">
-                            <button id="btn_fetch" class="btn btn-lg btn-success" type="button">查詢</button>
-                        </div>
-                        <!--end of col-->
-                    </div>
-                </form>
+<body class="cyber-gradient min-h-screen antialiased">
+    <div class="scanline"></div>
+
+    <main role="main" class="flex flex-col items-center justify-center min-h-screen p-4">
+        <div class="max-w-xl w-full p-8 border border-primary/50 bg-card/80 rounded-lg shadow-2xl cyber-glow">
+            
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-mono text-primary pulse-glow tracking-widest">
+                    [ Y T : C Y B E R S Y N C ]
+                </h1>
+                <p class="text-sm text-muted-foreground mt-2">
+                    // Input Stream URL for Direct Download
+                </p>
+            </header>
+
+            <form id="downloadForm" class="space-y-6" action="download.php" method="GET">
+                <div>
+                    <label for="txt_url" class="block text-sm font-medium text-primary mb-2">
+                        URL (Input/Target)
+                    </label>
+                    <input
+                        type="text"
+                        id="txt_url"
+                        name="video_url"
+                        placeholder="Enter YouTube or supported video URL here..."
+                        required
+                        class="w-full px-4 py-3 bg-input border border-primary/50 text-foreground font-mono rounded-md shadow-inner focus:ring-2 focus:ring-primary focus:border-primary/80 transition duration-300"
+                    >
+                </div>
+
+                <button
+                    id="btn_fetch"
+                    type="button"
+                    class="w-full py-3 text-lg font-bold rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition duration-300 transform hover:scale-[1.01] shadow-xl cyber-glow-secondary pulse-glow"
+                >
+                    INITIATE QUERY SEQUENCE
+                </button>
+            </form>
+
+            <div id="statusOutput" class="mt-8 pt-4 border-t border-border/50">
+                <h2 class="text-base font-mono text-accent mb-2">
+                    [SYSTEM LOG]
+                </h2>
+                <pre id="statusOutput-pre" class="bg-muted/30 p-3 rounded-md text-muted-foreground text-xs overflow-auto h-12 border border-border">
+                    Waiting for target URL...
+                </pre>
             </div>
-            <!--end of col-->
+
+            <div class="mt-8 overflow-x-auto">
+                <table class="w-full text-sm text-left table-auto">
+                    <thead class="text-xs text-primary uppercase bg-card border-b border-primary/50">
+                        <tr>
+                            <th scope="col" class="py-3 px-2">#</th>
+                            <th scope="col" class="py-3 px-2">FORMAT</th>
+                            <th scope="col" class="py-3 px-2">ITAG</th>
+                            <th scope="col" class="py-3 px-2">LINK</th>
+                        </tr>
+                    </thead>
+                    <tbody id="video-lists" class="font-mono">
+                        </tbody>
+                </table>
             </div>
-           <div class="row justify-content-left">
-          <table class="table">
-            <thead class="thead-dark">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">影片格式</th>
-                <th scope="col">itag</th>
-                <th scope="col">影片網址</th>
-              </tr>
-            </thead>
-            <tbody id="video-lists"></tbody>
-          </table>
-          </div>
+            
         </div>
     </main>
 </body>
